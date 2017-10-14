@@ -68,6 +68,10 @@ void parse_options(int argc, char *argv[])
             printf("expression: %s\n", argv[++i]);
             expression = argv[i];
         }
+		if(strcmp("-k",argv[i]) == 0) {
+            printf("key: %s\n", argv[++i]);
+            key = (int) *argv[i];
+        }
         if(strcmp("-find",argv[i]) == 0) {
             key = (int) *argv[++i];             
             printf("Find< %i >\n", key);            
@@ -132,9 +136,8 @@ int main(int argc, char *argv[])
 
             // receiving the value:
             receiveFrame(&frame, sockfd);
-            strcpy(buffer, frame.data);
+			strcpy(buffer, frame.data);           
             printf("Return from server: %s (%d bytes)\n", buffer, (int) frameSize(&frame));
-
 
 
         } else {
@@ -155,12 +158,14 @@ int main(int argc, char *argv[])
 
             // receiving the value:
             receiveFrame(&frame, sockfd);
-            strcpy(buffer, frame.data);
-            printf("Return from server: %s (%d bytes)\n", buffer, (int) frameSize(&frame));
+			strcpy(ip_address, frame.data);
+            printf("Return from server: %s (%d bytes)\n", ip_address, (int) frameSize(&frame));			
 
         }
 
-    } else {
+    }
+	
+	if (filename) {
 	    // send the store operation:
         strcpy(buffer,"send");
         createFrame(&frame, buffer);
