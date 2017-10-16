@@ -1,6 +1,6 @@
 /*
 * Peer Table System 
-* Created by Bernardo Meneghini, Lucas Ramon and Thiago Alexandre.
+* Created by Bernardo Meneghini, Lucas Ramon, Thiago Alexandre and Victor Moraes.
 * This program implements a peer table and exports the find and store functions.
 */
 
@@ -9,17 +9,20 @@
 char *peer_table[32];
 char *result;
 int  key;
-char *address;
+char *address = (char *) malloc(100);
 
 void find(int argc)
 {
-     result =  peer_table[argc];	
+     printf("Find: Valor encontrado é %s\n", peer_table[argc]);
+     result = peer_table[argc];	
 }
 
 void store(int argc, char *argv)
 {
+     printf("Key: %i and Store: %s\n", argc, argv);
      peer_table[argc] = argv;
-     result = peer_table[argc];	
+     printf("Store: Valor armazenado é %s", peer_table[argc]);
+     result = peer_table[argc];
 }
 
 int main(int argc, char *argv[])
@@ -87,10 +90,9 @@ int main(int argc, char *argv[])
             receiveFrame(&frame, sockfd);
             key = (int) *frame.data;
             printf("Receiving the key: %i \n", key);
-
             //find operation:
     	    find(key);
-    	    strcpy(buffer,result);
+    	    strcpy(buffer, result);
     	    createFrame(&frame, result);
     	    sendFrame(&frame, sockfd, frameSize(&frame));
 
@@ -164,7 +166,6 @@ int main(int argc, char *argv[])
     		printf("File received.\n");
     		fclose(file);
 	   }
-        
         close(sockfd);
         sleep(1);
     }

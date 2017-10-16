@@ -1,6 +1,6 @@
 /*
 * Peer Table System 
-* Created by Bernardo Meneghini, Lucas Ramon and Thiago Alexandre.
+* Created by Bernardo Meneghini, Lucas Ramon, Thiago Alexandre and Victor Moraes.
 * This program sends to the server side the execution request of the find and store functions in the peer table.
 */
 
@@ -73,11 +73,11 @@ void parse_options(int argc, char *argv[])
             key = (int) *argv[i];
         }
         if(strcmp("-find",argv[i]) == 0) {
-            key = (int) *argv[++i];             
+            key = atoi(argv[++i]);             
             printf("Find< %i >\n", key);            
         }
         if(strcmp("-store",argv[i]) == 0) {
-            key = (int) *argv[++i];                     
+            key = atoi(argv[++i]);
             address = argv[++i];
             printf("Store< %i, %s >\n", key, address);            
         }
@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
             printf("Confirmation from server: %s \n", buffer);
 
             // send the key:
+            printf("Key: %i\n", key);
             strcpy(buffer,(char*) &key);
             createFrame(&frame, buffer);
             sendFrame(&frame, sockfd, frameSize(&frame));
@@ -215,7 +216,6 @@ int main(int argc, char *argv[])
         printf("File sent.\n");
         fclose(msgFile);
     }
-
     close(sockfd);
     return 0;
 }
