@@ -7,9 +7,11 @@
 #include "supportl.h"
 
 char *peer_table[32];
-char *result;
-int  key;
+char *result = (char *) malloc(100);;
 char *address = (char *) malloc(100);
+char *next = (char *) malloc(100);
+int  key;
+int  myKey;
 
 void find(int argc)
 {
@@ -25,8 +27,56 @@ void store(int argc, char *argv)
      result = peer_table[argc];
 }
 
+void search(int argc){
+	char str[12];
+	sprintf(str, "%i", argc);
+    char comand[] = "./client -i ";
+    strcat(comand, next);
+    strcat(comand, "-find ");
+    strcat(comand, str);
+    char x = system(comand);
+    if ( WIFEXITED(x) ) {
+    	if (WEXITSTATUS(x) != 0){
+    		strcpy(result, "192.0.0.");
+    		sprintf(str, "%d", WEXITSTATUS(x));
+    		strcat(result, str);
+        	printf("The return value: %s\n", result);
+    	}
+    }
+    else if (WIFSIGNALED(x)) {
+        printf("The program exited because of signal (signal no:%i)\n", WTERMSIG(x));
+    }
+}
+
+void onInit(int argc, char *argv[]){
+	for(int i = 0; i < 32; i++ ){
+		strcpy(peer_table[i], "0");
+	}
+	// Salving the key to the node
+	char s[10];
+	strcpy(s, argv[1]);
+	myKey = atoi(s);
+	// Salving the next node
+	strcpy(s, argv[2]);	
+	strcpy(address, argv[3]);
+	key = atoi(s);
+	store(key, address);
+	// Searching for the previous node
+	for(int k = myKey - 1; k == myKey; k--){
+		if(k == -1)
+			k=31;
+		search(k);
+        if (strcmp(result, "0") != 0){
+            store(k,result);;
+            k = myKey;
+        }				
+        
+	}
+}
+
 int main(int argc, char *argv[])
 {
+	onInit(argc, argv);
     int listener, sockfd; // Socket file descriptors
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
@@ -90,8 +140,34 @@ int main(int argc, char *argv[])
             receiveFrame(&frame, sockfd);
             key = (int) *frame.data;
             printf("Receiving the key: %i \n", key);
+
             //find operation:
     	    find(key);
+
+    	    // if not find it
+    	    if (strcmp(result, "0") == 0){
+                for(int i = myKey+1; i == myKey; i++ ){
+                	// if not found
+                	if (key < i || (key > myKey && i < myKey)){
+                		strcpy(buffer, result);
+    	    			createFrame(&frame, result);
+    	    			sendFrame(&frame, sockfd, frameSize(&frame));
+    	    			return 0; 
+                	}
+
+                	// ask the next
+                    search(key);
+
+                    if (i == 31)
+                        i = -1;                    
+                    if (strcmp(result, "0") != 0){
+                        next = result;
+                        i = myKey - 1;
+                    }
+                }
+                
+            }
+
     	    strcpy(buffer, result);
     	    createFrame(&frame, result);
     	    sendFrame(&frame, sockfd, frameSize(&frame));

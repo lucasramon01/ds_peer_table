@@ -160,7 +160,22 @@ int main(int argc, char *argv[])
             // receiving the value:
             receiveFrame(&frame, sockfd);
 			strcpy(ip_address, frame.data);
-            printf("Return from server: %s (%d bytes)\n", ip_address, (int) frameSize(&frame));			
+            printf("Return from server: %s (%d bytes)\n", ip_address, (int) frameSize(&frame));
+
+            char y[12];
+            strcpy(y, frame.data);
+            int len = strlen(y);
+			for (int i = 0, posicao = 0; i < len; i++, posicao++) {
+		        if (y[posicao] == '.') {        	
+		        	i = 0;
+		        	len = strlen(y);
+		        	posicao++;      
+		        }
+		        y[i] = y[posicao];
+		    }
+
+		    int x = atoi(y);
+			return x;
 
         }
 
@@ -202,7 +217,6 @@ int main(int argc, char *argv[])
             error("File doesn't exist");
 
         // Finally, Sending files:
-        int i = 0;
         int c;
         bzero(buffer,BUFFER_SIZE);
         size_t nbytes = fread(buffer, sizeof(char), MAX_DATA_SIZE-1, msgFile);

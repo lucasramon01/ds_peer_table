@@ -12,12 +12,13 @@ You can use and modify the source code as you pleased.
 * gcc client-side.c -o client
 
 # Running
-* ./server
-* ./client -i 127.0.0.1 -f logs.txt -e expression
+* Run Server: enter the node key, the key and the adress of the next in the group.
+		./server key nKey nIp
+* Read Logs: enter the ip of target machine, the name of the file created, and the expression you and to search.
+		./client -i ip -f fileneme -e expression
+* Find: enter the ip of target machine and the key.
+		./client -i ip -find key
+* Store: enter the ip of target machine, key and adress.
+		./client -i ip -store key value
 
-Find:
-* ./client -i 127.0.0.1 -find key
-
-Store:
-* ./client -i 127.0.0.1 -store key value
 
