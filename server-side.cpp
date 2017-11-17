@@ -32,7 +32,7 @@ void search(int argc){
     sprintf(str, "%i", argc);
     char comand[] = "./client -i ";
     strcat(comand, next);
-    strcat(comand, "-find ");
+    strcat(comand, " -find ");
     strcat(comand, str);
     char x = system(comand);
     if ( WIFEXITED(x) ) {
@@ -63,6 +63,7 @@ void onInit(int argc, char *argv[]){
 	strcpy(address, argv[3]);
 	key = atoi(s);
 	store(key, address);
+	strcpy(next, argv[3]);
 
 	// If the node is the first to enter in the network
 	if (strcmp(argv[4], "y") != 0){
@@ -72,7 +73,7 @@ void onInit(int argc, char *argv[]){
 				k=31;
 			search(k);
 			if (strcmp(result, "0") != 0){
-			    store(k,result);;
+			    store(k,result);
 			    k = myKey;
 			}				
 		}
@@ -149,28 +150,9 @@ int main(int argc, char *argv[])
             //find operation:
     	    find(key);
 
-    	    // if not find it
-    	    if (strcmp(result, "0") == 0){
-                for(int i = myKey+1; i == myKey; i++ ){
-                	// if not found
-                	if (key < i || (key > myKey && i < myKey)){
-                		strcpy(buffer, result);
-    	    			createFrame(&frame, result);
-    	    			sendFrame(&frame, sockfd, frameSize(&frame));
-    	    			return 0; 
-                	}
-
-                	// ask the next
-                    search(key);
-
-                    if (i == 31)
-                        i = -1;                    
-                    if (strcmp(result, "0") != 0){
-                        next = result;
-                        i = myKey - 1;
-                    }
-                }
-                
+    	    // if not find it, ask the next
+    	    if (*result == '0'){
+                search(key);                
             }
 
     	    strcpy(buffer, result);
