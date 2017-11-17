@@ -55,7 +55,8 @@ void parse_options(int argc, char *argv[])
        exit(0);
     }
     puts("----- initial information -----");
-    for(int i = 1; i < argc; ++i) {
+    int i;
+    for(i = 1; i < argc; ++i) {
         if(strcmp("-i",argv[i]) == 0) {
             printf("ip: %s\n",argv[++i]);
             ip_address = argv[i];
@@ -165,7 +166,9 @@ int main(int argc, char *argv[])
             char y[12];
             strcpy(y, frame.data);
             int len = strlen(y);
-			for (int i = 0, posicao = 0; i < len; i++, posicao++) {
+            int i = 0; 
+            int posicao = 0;
+			for (i, posicao = 0; i < len; i++, posicao++) {
 		        if (y[posicao] == '.') {        	
 		        	i = 0;
 		        	len = strlen(y);

@@ -74,8 +74,9 @@ void createFrame(struct Frame *frame, char *message){
 
 void bytesToStr(char *p, char *d, size_t len){
     char * ptr = d;
+    int i = 0;
     ptr+=sprintf(ptr, "[");
-    for (int i = 0; i < len-1; ++i)
+    for (i = 0; i < len-1; ++i)
         ptr+=sprintf(ptr,"%02x:",(unsigned char) p[i]);
     ptr+=sprintf(ptr,"%02x",(unsigned char)p[len-1]);
     ptr+=sprintf(ptr, "]");
@@ -85,12 +86,13 @@ void bytesToStr(char *p, char *d, size_t len){
 
 void printFrame(struct Frame *frame){
     char aux[BUFFER_SIZE];
+    int i = 0;
     bytesToStr(frame->preamble, aux, PREAMBLE_SIZE );
     printf("Frame:\n\tpreamble: %s\n",aux);
     bytesToStr(frame->ethernetType, aux, PROTOCOL_SIZE );
     printf("\tethernetType: %s\n",aux);
     getData(frame, aux);
-    for(int i=0; i<strnlen(frame->data, MAX_DATA_SIZE); i++)
+    for(i=0; i<strnlen(frame->data, MAX_DATA_SIZE); i++)
         if(aux[i]=='\n' || aux[i]=='\t' || aux[i]==' ')
             aux[i] = '_';
     printf("\tdata: [%s]\n",aux);
