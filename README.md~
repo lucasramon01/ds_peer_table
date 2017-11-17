@@ -14,7 +14,7 @@ You can use and modify the source code as you pleased.
 # Running
 * Run Server: enter the node key, the key and the adress of the next in the group.
 
-	./server key nKey nIp isFirst
+	./server key nKey nIp
 * Read Logs: enter the ip of target machine, the name of the file created, and the expression you and to search.
 	./client -i ip -f fileneme -e expression
 * Find: enter the ip of target machine and the key.

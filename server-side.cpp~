@@ -21,7 +21,7 @@ void find(int argc)
 
 void store(int argc, char *argv)
 {
-     printf("Key: %i and Store: %s\n", argc, argv);
+     printf("\nKey: %i and Store: %s\n", argc, argv);
      peer_table[argc] = argv;
      printf("Store: Valor armazenado é %s ", peer_table[argc]);
      result = peer_table[argc];
