@@ -64,6 +64,16 @@ void search(int argc){
     }
 }
 
+void quit() {
+	printf("Initiating exit process. \n");
+	strcpy(address, previous);
+	callStore(nextKey, next);
+	strcpy(address, next);
+	callStore(previousKey, previous);
+	printf("I'm leaving now, bye. \n");
+    exit(0);
+} 
+
 void getPreviousNode(int argc){
     char str[4];
     sprintf(str, "%i", argc);
@@ -85,19 +95,19 @@ void getPreviousNode(int argc){
     }
 }
 
-void callStore(){
+void callStore(int argc, char *argv){
     char str[4];
-    sprintf(str, "%d", myKey);
+    sprintf(str, "%d", argc);
 
     char comand[64] = "./client -i ";
     strcat(comand, address);
     strcat(comand, " -store ");
 	strcat(comand, str);
 	strcat(comand, " ");
-	strcat(comand, myIp);
+	strcat(comand, argv);
 	int x = system(comand);
 
-	if ( WIFEXITED(x) ) {
+	/*if ( WIFEXITED(x) ) {
     	if (WEXITSTATUS(x) != 0){
     		//strcpy(previous, network);
     		sprintf(str, "%d", WEXITSTATUS(x));
@@ -107,7 +117,7 @@ void callStore(){
     }
     else if (WIFSIGNALED(x)) {
         printf("The program exited because of signal (signal no:%i)\n", WTERMSIG(x));
-    }
+    }*/
 }
 
 void callFind(int argc){
@@ -195,15 +205,20 @@ void onInit(int argc, char *argv[]){
 		strcpy(previous, result); 
 
 		strcpy(address, previous);
-		callStore();
+		callStore(myKey, myIp);
 		strcpy(address, next);
-		callStore();
-	}
+		callStore(myKey, myIp);
+	} else {
+        strcpy(s, argv[5]); 
+        strcpy(previous, argv[6]);
+        previousKey = atoi(s);
+    }
 }
 
 int main(int argc, char *argv[])
 {
     onInit(argc, argv);
+    signal(SIGABRT, quit);
     int listener, sockfd; // Socket file descriptors
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;

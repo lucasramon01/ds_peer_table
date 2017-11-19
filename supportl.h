@@ -17,6 +17,7 @@
 #include <sys/sendfile.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <signal.h>
 
 #include <sys/ioctl.h>
 #include <linux/if_arp.h>
