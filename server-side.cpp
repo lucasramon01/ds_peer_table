@@ -7,28 +7,44 @@
 #include "supportl.h"
 
 char *peer_table[32];
+
+int  myKey;
+char *myIp = (char *) malloc(100);
+char *network = (char *) malloc(100);
+
+int nextKey;
+int previousKey;
+char *next = (char *) malloc(100);
+char *previous = (char *) malloc(100);
+
+int  key;
 char *result = (char *) malloc(100);
 char *address = (char *) malloc(100);
-char *next = (char *) malloc(100);
-int  key;
-int  myKey;
 
-void find(int argc)
-{
+
+void find(int argc) {
      printf("Find: Valor encontrado é %s\n", peer_table[argc]);
      result = peer_table[argc];	
 }
 
-void store(int argc, char *argv)
-{
+void store(int argc, char *argv) {
      printf("Key: %i and Store: %s\n", argc, argv);
      peer_table[argc] = argv;
      printf("Store: Valor armazenado é %s ", peer_table[argc]);
      result = peer_table[argc];
+
+    if ((key > myKey && key < nextKey) || ( nextKey < myKey && ( key > myKey || key < nextKey )) ){
+     	nextKey = key;
+     	strcpy(next, argv);
+    }
+    if ((key < myKey && key > previousKey) || ( previousKey > myKey && ( key < myKey || key > previousKey )) ){
+     	previousKey = key;
+     	strcpy(previous, argv);
+    }
 }
 
 void search(int argc){
-    char str[12];
+    char str[16];
     sprintf(str, "%i", argc);
     char comand[] = "./client -i ";
     strcat(comand, next);
@@ -37,7 +53,7 @@ void search(int argc){
     char x = system(comand);
     if ( WIFEXITED(x) ) {
     	if (WEXITSTATUS(x) != 0){
-    		strcpy(result, "10.0.3.");
+    		strcpy(result, network);
     		sprintf(str, "%d", WEXITSTATUS(x));
     		strcat(result, str);
         	printf("The return value: %s\n", result);
@@ -48,35 +64,140 @@ void search(int argc){
     }
 }
 
+void getPreviousNode(int argc){
+    char str[4];
+    sprintf(str, "%i", argc);
+    char comand[64] = "./client -i ";
+    strcat(comand, previous);
+    strcat(comand, " -p ");
+    strcat(comand, str);
+    int x = system(comand);
+    if ( WIFEXITED(x) ) {
+    	if (WEXITSTATUS(x) != 0){
+    		//strcpy(previous, network);
+    		sprintf(str, "%d", WEXITSTATUS(x));
+    		strcpy(result, str);
+        	printf("The return value: %s\n", result);        	
+    	}
+    }
+    else if (WIFSIGNALED(x)) {
+        printf("The program exited because of signal (signal no:%i)\n", WTERMSIG(x));
+    }
+}
+
+void callStore(){
+    char str[4];
+    sprintf(str, "%d", myKey);
+
+    char comand[64] = "./client -i ";
+    strcat(comand, address);
+    strcat(comand, " -store ");
+	strcat(comand, str);
+	strcat(comand, " ");
+	strcat(comand, myIp);
+	int x = system(comand);
+
+	if ( WIFEXITED(x) ) {
+    	if (WEXITSTATUS(x) != 0){
+    		//strcpy(previous, network);
+    		sprintf(str, "%d", WEXITSTATUS(x));
+    		strcpy(result, str);
+        	printf("The return value: %s\n", result);        	
+    	}
+    }
+    else if (WIFSIGNALED(x)) {
+        printf("The program exited because of signal (signal no:%i)\n", WTERMSIG(x));
+    }
+}
+
+void callFind(int argc){
+    char str[4];
+    sprintf(str, "%d", argc);
+
+    char comand[64] = "./client -i ";
+    strcat(comand, address);
+    strcat(comand, " -find ");
+	strcat(comand, str);
+	int x = system(comand);
+
+	if ( WIFEXITED(x) ) {
+    	if (WEXITSTATUS(x) != 0){
+    		sprintf(str, "%d", WEXITSTATUS(x));
+    		strcpy(result, str);
+        	printf("The return value: %s\n", result);        	
+    	}
+    }
+    else if (WIFSIGNALED(x)) {
+        printf("The program exited because of signal (signal no:%i)\n", WTERMSIG(x));
+    }
+}
+
+// Define a rede.
+int defineNetwork(int argc, char *argv[]){
+	char y[16];
+	strcpy(y, argv[3]);
+	int len = strlen(y);
+	int i;
+	for (i = len - 1; i > 0; i--) {
+		if (y[i] == '.') {
+        	i = 0;    
+        } else {
+			y[i] = y[i+1];  	
+        }        
+    }
+    strcpy(network, y);
+
+    return 0;
+}
+
+// Comando para saber seu próprio Ip
+void defineMyIp(){
+	char y[16];
+    char comand[] = "ifconfig | grep inet' 'end.:' '";
+    strcat(comand, network);
+    strcat(comand, " | cut -f2 -d':'| cut -f2 -d' ' > output.txt");
+    system(comand);
+
+    FILE *arq;
+    arq = fopen("output.txt", "rt");
+    fgets(y, 100, arq);    
+	strcpy(myIp, y);
+
+    remove("output.txt");
+}
+
 void onInit(int argc, char *argv[]){
 	strcpy(next, "0");
-	for(int i = 0; i < 32; i++ ){
+	int i;
+	for(i = 0; i < 32; i++ ){
 		store(i, next);
 	}
-
 	// Salving the key to the node
-	char s[10];
+	char s[16];
 	strcpy(s, argv[1]);
 	myKey = atoi(s);
 	// Salving the next node
 	strcpy(s, argv[2]);	
-	strcpy(address, argv[3]);
-	key = atoi(s);
-	store(key, address);
 	strcpy(next, argv[3]);
+	nextKey = atoi(s);
+	store(nextKey, next);
 
-	// If the node is the first to enter in the network
+	defineNetwork(argc, argv);
+	defineMyIp();
+
+	// If the node is not the first to enter in the network
 	if (strcmp(argv[4], "y") != 0){
-		// Searching for the previous node
-		for(int k = myKey - 1; k == myKey; k--){
-			if(k == -1)
-				k=31;
-			search(k);
-			if (strcmp(result, "0") != 0){
-			    store(k,result);
-			    k = myKey;
-			}				
-		}
+		getPreviousNode(nextKey);
+		previousKey = atoi(result);
+
+		strcpy(address, next);
+		callFind(previousKey);
+		strcpy(previous, result); 
+
+		strcpy(address, previous);
+		callStore();
+		strcpy(address, next);
+		callStore();
 	}
 }
 
@@ -187,6 +308,36 @@ int main(int argc, char *argv[])
             createFrame(&frame, result);
             sendFrame(&frame, sockfd, frameSize(&frame));          
     	
+
+        } else if(strcmp("get node",operation) == 0){
+
+            printf("Get Node\n");
+            // send confirmation:
+            strcpy(buffer,"OK");
+            createFrame(&frame, buffer);
+            sendFrame(&frame, sockfd, frameSize(&frame));
+
+            // receiving the key:
+            receiveFrame(&frame, sockfd);
+            key = (int) *frame.data;
+            printf("Receiving the key: %i \n", key);
+
+            //find operation:
+    	    find(key);
+
+    	    // if not find it, ask the next
+    	    if (key == nextKey){
+				char str[4];
+    			sprintf(str, "%i", myKey);
+    			strcpy(result, str);	
+    	    	//strcpy(result,myIp);                                
+            } else {
+	            getPreviousNode(key);
+            }
+
+    	    strcpy(buffer, result);
+    	    createFrame(&frame, result);
+    	    sendFrame(&frame, sockfd, frameSize(&frame));
 
         } else if (strcmp("send",operation) == 0){
 

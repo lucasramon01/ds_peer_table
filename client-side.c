@@ -10,9 +10,10 @@ char buffer[BUFFER_SIZE];
 char *ip_address;
 char *filename;
 char *expression;
+char *address;
 
 int  key;
-char *address;
+int  getKey;
 
 int connectSocket(char *ip_address){
     int sockfd; // socket file descriptor
@@ -58,20 +59,20 @@ void parse_options(int argc, char *argv[])
     int i;
     for(i = 1; i < argc; ++i) {
         if(strcmp("-i",argv[i]) == 0) {
-            printf("ip: %s\n",argv[++i]);
-            ip_address = argv[i];
+        	ip_address = argv[++i];
+            printf("ip: %s\n",ip_address);            
+        }
+        if(strcmp("-k",argv[i]) == 0) {
+			key = atoi(argv[++i]);
+            printf("key: %i\n", key);
         }
         if(strcmp("-f",argv[i]) == 0) {
-            printf("filename: %s\n", argv[++i]);
-            filename = argv[i];
+        	filename = argv[++i];
+            printf("filename: %s\n", filename);            
         }
         if(strcmp("-e",argv[i]) == 0) {
-            printf("expression: %s\n", argv[++i]);
-            expression = argv[i];
-        }
-		if(strcmp("-k",argv[i]) == 0) {
-            printf("key: %s\n", argv[++i]);
-            key = (int) *argv[i];
+        	expression = argv[++i];
+            printf("expression: %s\n", expression);            
         }
         if(strcmp("-find",argv[i]) == 0) {
             key = atoi(argv[++i]);             
@@ -81,6 +82,10 @@ void parse_options(int argc, char *argv[])
             key = atoi(argv[++i]);
             address = argv[++i];
             printf("Store< %i, %s >\n", key, address);            
+        }
+        if(strcmp("-p",argv[i]) == 0) {
+        	getKey = atoi(argv[++i]);
+            printf("Get Previous of: %i\n", getKey);            
         }
 
     }
@@ -142,6 +147,29 @@ int main(int argc, char *argv[])
             printf("Return from server: %s (%d bytes)\n", buffer, (int) frameSize(&frame));
 
 
+        } else if (getKey){
+            // send the find operation:
+            strcpy(buffer,"get node");
+            createFrame(&frame, buffer);
+            sendFrame(&frame, sockfd, frameSize(&frame));
+
+            // receiving confirmation:
+            receiveFrame(&frame, sockfd);
+            strcpy(buffer, frame.data);
+            printf("Confirmation from server: %s \n", buffer);
+
+            // send the key:
+            strcpy(buffer,(char*) &key);
+            createFrame(&frame, buffer);
+            sendFrame(&frame, sockfd, frameSize(&frame));
+
+            // receiving the value:
+            receiveFrame(&frame, sockfd);
+			getKey = atoi(frame.data);
+            printf("Return from server: %i (%d bytes)\n", getKey, (int) frameSize(&frame));
+
+			return getKey;
+
         } else {
             // send the find operation:
             strcpy(buffer,"find");
@@ -160,25 +188,10 @@ int main(int argc, char *argv[])
 
             // receiving the value:
             receiveFrame(&frame, sockfd);
-			strcpy(ip_address, frame.data);
-            printf("Return from server: %s (%d bytes)\n", ip_address, (int) frameSize(&frame));
+            key = atoi(frame.data);
+            printf("Return from server: %i (%d bytes)\n", key, (int) frameSize(&frame));
 
-            char y[12];
-            strcpy(y, frame.data);
-            int len = strlen(y);
-            int i = 0; 
-            int posicao = 0;
-			for (i, posicao = 0; i < len; i++, posicao++) {
-		        if (y[posicao] == '.') {        	
-		        	i = 0;
-		        	len = strlen(y);
-		        	posicao++;      
-		        }
-		        y[i] = y[posicao];
-		    }
-
-		    int x = atoi(y);
-			return x;
+			return key;
 
         }
 

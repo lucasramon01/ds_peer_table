@@ -12,14 +12,20 @@ You can use and modify the source code as you pleased.
 * gcc client-side.c -o client
 
 # Running
-* Run Server: enter the node key, the key and the adress of the next in the group.
+* Run Server: enter the node key, the key, the adress of the next in the group and if the group is starting (y or n).
 
-	./server key nKey nIp isFirst
+	./server key nKey nIp isStarting
+
 * Read Logs: enter the ip of target machine, the name of the file created, and the expression you and to search.
+
 	./client -i ip -f fileneme -e expression
+
 * Find: enter the ip of target machine and the key.
+
 	./client -i ip -find key
+
 * Store: enter the ip of target machine, key and adress.
+
 	./client -i ip -store key value
 
 
