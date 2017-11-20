@@ -134,7 +134,7 @@ void callFind(int argc){
     }
 }
 
-void quit() {
+void quit(int argc) {
 	printf("Initiating exit process. \n");
 	strcpy(address, previous);
 	callStore(nextKey, next);
@@ -164,9 +164,9 @@ int defineNetwork(int argc, char *argv[]){
 }
 
 // Comando para saber seu próprio Ip
-void defineMyIp(){
+void defineMyIp(int argc, char *argv[]){
 	char y[64];
-    char comand[] = "ifconfig | grep inet' 'end.:' '";
+    char comand[128] = "ifconfig | grep inet' 'end.:' '";
     strcat(comand, network);
     strcat(comand, " | cut -f2 -d':'| cut -f2 -d' ' > output.txt");
     system(comand);
@@ -176,8 +176,10 @@ void defineMyIp(){
     fgets(y, 64, arq);    
 	strcpy(myIp, y);
 	printf("My adress: %s \n", myIp);
+	printf("---------------\n");
 
-    remove("output.txt");
+
+    //remove("output.txt");
 }
 
 void onInit(int argc, char *argv[]){
@@ -195,13 +197,14 @@ void onInit(int argc, char *argv[]){
 	strcpy(next, argv[3]);
 	nextKey = atoi(s);
 	store(nextKey, next);
+	printf("Setting next: %i %s \n", nextKey, next);
 
 	defineNetwork(argc, argv);
-	defineMyIp();
+	defineMyIp(argc, argv);
 
 	// If the node is not the first to enter in the network
 	if (strcmp(argv[4], "y") != 0){
-		printf("Entering in the group");
+		printf("Entering in the group\n");
 		getPreviousNode(nextKey);
 		previousKey = atoi(result);
 
@@ -214,11 +217,11 @@ void onInit(int argc, char *argv[]){
 		strcpy(address, next);
 		callStore(myKey, myIp);
 	} else {
-		printf("Is starting the group");
+		printf("Is starting the group\n");
         strcpy(s, argv[5]);         
         strcpy(previous, argv[6]);
         previousKey = atoi(s);
-        printf("%i %s", previousKey, previous);
+        printf("Setting previous: %i %s \n", previousKey, previous);
     }
 
 }
@@ -226,7 +229,12 @@ void onInit(int argc, char *argv[]){
 int main(int argc, char *argv[])
 {
     onInit(argc, argv);
-    //signal(SIGABRT, quit);
+    //mata o processo com kill -SIGABRT pid
+    /*signal(SIGABRT, quit);    
+    struct sigaction psa;
+    psa.sa_handler = quit;
+    sigaction(SIGABRT, &psa, NULL);*/
+
     int listener, sockfd; // Socket file descriptors
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
