@@ -21,17 +21,19 @@ int  key;
 char *result = (char *) malloc(100);
 char *address = (char *) malloc(100);
 
-
 void find(int argc) {
      printf("Find: Valor encontrado é %s\n", peer_table[argc]);
      result = peer_table[argc];	
 }
 
-void store(int argc, char *argv) {
-     printf("Key: %i and Store: %s\n", argc, argv);
+void store(int argc, char *argv) {     
      peer_table[argc] = argv;
-     printf("Store: Valor armazenado é %s ", peer_table[argc]);
      result = peer_table[argc];
+
+    if (strcmp(argv, "0") != 0) {
+        printf("Key: %i and Store: %s\n", argc, argv);
+        printf("Store: Valor armazenado é %s \n", peer_table[argc]);
+    }
 
     if ((key > myKey && key < nextKey) || ( nextKey < myKey && ( key > myKey || key < nextKey )) ){
      	nextKey = key;
@@ -156,14 +158,14 @@ int defineNetwork(int argc, char *argv[]){
         }        
     }
     strcpy(network, y);
-    printf("network: %s", network);
+    printf("Network: %s \n", network);
 
     return 0;
 }
 
 // Comando para saber seu próprio Ip
 void defineMyIp(){
-	char y[16];
+	char y[64];
     char comand[] = "ifconfig | grep inet' 'end.:' '";
     strcat(comand, network);
     strcat(comand, " | cut -f2 -d':'| cut -f2 -d' ' > output.txt");
@@ -171,11 +173,11 @@ void defineMyIp(){
 
     FILE *arq;
     arq = fopen("output.txt", "rt");
-    fgets(y, 100, arq);    
+    fgets(y, 64, arq);    
 	strcpy(myIp, y);
-	//printf("myIp: %s", myIp);
+	printf("My adress: %s \n", myIp);
 
-    //remove("output.txt");
+    remove("output.txt");
 }
 
 void onInit(int argc, char *argv[]){
@@ -199,7 +201,7 @@ void onInit(int argc, char *argv[]){
 
 	// If the node is not the first to enter in the network
 	if (strcmp(argv[4], "y") != 0){
-		printf("entrou1");
+		printf("Entering in the group");
 		getPreviousNode(nextKey);
 		previousKey = atoi(result);
 
@@ -212,12 +214,13 @@ void onInit(int argc, char *argv[]){
 		strcpy(address, next);
 		callStore(myKey, myIp);
 	} else {
-		printf("entrou2");
+		printf("Is starting the group");
         strcpy(s, argv[5]);         
         strcpy(previous, argv[6]);
         previousKey = atoi(s);
         printf("%i %s", previousKey, previous);
     }
+
 }
 
 int main(int argc, char *argv[])
