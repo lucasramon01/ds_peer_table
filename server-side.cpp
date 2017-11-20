@@ -64,16 +64,6 @@ void search(int argc){
     }
 }
 
-void quit() {
-	printf("Initiating exit process. \n");
-	strcpy(address, previous);
-	callStore(nextKey, next);
-	strcpy(address, next);
-	callStore(previousKey, previous);
-	printf("I'm leaving now, bye. \n");
-    exit(0);
-} 
-
 void getPreviousNode(int argc){
     char str[4];
     sprintf(str, "%i", argc);
@@ -142,6 +132,16 @@ void callFind(int argc){
     }
 }
 
+void quit() {
+	printf("Initiating exit process. \n");
+	strcpy(address, previous);
+	callStore(nextKey, next);
+	strcpy(address, next);
+	callStore(previousKey, previous);
+	printf("I'm leaving now, bye. \n");
+    exit(0);
+} 
+
 // Define a rede.
 int defineNetwork(int argc, char *argv[]){
 	char y[16];
@@ -156,6 +156,7 @@ int defineNetwork(int argc, char *argv[]){
         }        
     }
     strcpy(network, y);
+    printf("network: %s", network);
 
     return 0;
 }
@@ -172,8 +173,9 @@ void defineMyIp(){
     arq = fopen("output.txt", "rt");
     fgets(y, 100, arq);    
 	strcpy(myIp, y);
+	//printf("myIp: %s", myIp);
 
-    remove("output.txt");
+    //remove("output.txt");
 }
 
 void onInit(int argc, char *argv[]){
@@ -197,6 +199,7 @@ void onInit(int argc, char *argv[]){
 
 	// If the node is not the first to enter in the network
 	if (strcmp(argv[4], "y") != 0){
+		printf("entrou1");
 		getPreviousNode(nextKey);
 		previousKey = atoi(result);
 
@@ -209,16 +212,18 @@ void onInit(int argc, char *argv[]){
 		strcpy(address, next);
 		callStore(myKey, myIp);
 	} else {
-        strcpy(s, argv[5]); 
+		printf("entrou2");
+        strcpy(s, argv[5]);         
         strcpy(previous, argv[6]);
         previousKey = atoi(s);
+        printf("%i %s", previousKey, previous);
     }
 }
 
 int main(int argc, char *argv[])
 {
     onInit(argc, argv);
-    signal(SIGABRT, quit);
+    //signal(SIGABRT, quit);
     int listener, sockfd; // Socket file descriptors
     struct sockaddr_in serv_addr, cli_addr;
     socklen_t clilen;
